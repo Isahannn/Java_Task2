@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <!-- Консольный аппендер с цветами (оставлен, но не используется) -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %highlight{%-5level}{ERROR=red, WARN=yellow, INFO=green, DEBUG=blue} %logger{36} - %msg%n"/>
+        </Console>
+
+        <!-- RollingFileAppender для записи логов в файл -->
+        <RollingFile name="RollingFile" fileName="logs/app.log" append="false"
+                     filePattern="logs/app-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <Policies>
+                <!-- Перекатывать файл каждый день -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <!-- Перекатывать файл, если его размер превышает 10 MB -->
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="debug">
+            <!-- Используем только файловый аппендер -->
+            <AppenderRef ref="RollingFile"/>
+            <!-- Консольный аппендер удален из Root -->
+        </Root>
+    </Loggers>
+</Configuration>
