@@ -1,4 +1,4 @@
-package org.example.creator.Impl;
+package org.example.creator;
 
 import org.example.entity.StraightLineEntity;
 

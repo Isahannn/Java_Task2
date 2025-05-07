@@ -1,6 +1,6 @@
-package org.example.creator;
+package org.example.creator.impl;
 
-import org.example.creator.Impl.StraightLineFactory;
+import org.example.creator.StraightLineFactory;
 import org.example.entity.StraightLineEntity;
 import org.example.validator.impl.StraightLineValidatorImpl;
 
