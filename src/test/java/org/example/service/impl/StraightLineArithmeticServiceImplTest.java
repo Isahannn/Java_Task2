@@ -24,7 +24,7 @@ public class StraightLineArithmeticServiceImplTest {
     }
 
     @Test
-    public void testAdd() {
+    public void testAdd() throws StraightLineEntityException {
         // Act
         StraightLineEntity result = arithmeticService.add(line1, line2);
 
@@ -39,7 +39,7 @@ public class StraightLineArithmeticServiceImplTest {
     }
 
     @Test
-    public void testSubtract() {
+    public void testSubtract() throws StraightLineEntityException {
         // Act
         StraightLineEntity result = arithmeticService.subtract(line1, line2);
 
@@ -54,7 +54,7 @@ public class StraightLineArithmeticServiceImplTest {
     }
 
     @Test
-    public void testMultiplyByScalar() {
+    public void testMultiplyByScalar() throws StraightLineEntityException {
         // Act
         StraightLineEntity result = arithmeticService.multiplyByScalar(line1, 2.0);
 
@@ -68,9 +68,9 @@ public class StraightLineArithmeticServiceImplTest {
         softAssert.assertAll();
     }
 
-    @Test(expectedExceptions = StraightLineEntityException.class, expectedExceptionsMessageRegExp = "Cannot divide by zero")
+    @Test(expectedExceptions = StraightLineEntityException.class,
+            expectedExceptionsMessageRegExp = "Division by zero is not allowed")
     public void testDivideByZero() throws StraightLineEntityException {
-        // Expect an exception to be thrown
         arithmeticService.divideByScalar(line1, 0.0);
     }
 

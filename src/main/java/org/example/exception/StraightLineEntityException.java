@@ -25,6 +25,7 @@ public class StraightLineEntityException extends Exception {
     }
     public enum ErrorType {
         NULL_LINE("annot divide by zero"),
+        IO_ERROR("annot divide by zero"),
         EMPTY_INPUT("annot divide by zero"),
         DIVISION_BY_ZERO("Cannot divide by zero"),
         FILE_OPERATION("File operation failed"),

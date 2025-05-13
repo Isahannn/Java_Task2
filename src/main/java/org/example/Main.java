@@ -1,60 +1,44 @@
 package org.example;
 
-import org.example.entity.Point;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.entity.StraightLineEntity;
 import org.example.exception.StraightLineEntityException;
 import org.example.facade.StraightLineFacade;
-import org.example.service.StraightLineService;
 
+import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
-
-
 
 public class Main {
-    public static final String DATA_FILE = "data/straight_lines.txt";
+    private static final Logger logger = LogManager.getLogger(Main.class);
+    private static final String DEFAULT_DATA_FILE = "data/straight_lines.txt";
+
     public static void main(String[] args) {
-        StraightLineFacade facade = new StraightLineFacade();
-
-        List<StraightLineEntity> lines;
         try {
-            lines = facade.loadStraightLines("straight_lines.txt");
+            StraightLineFacade facade = new StraightLineFacade();
+            List<StraightLineEntity> lines = facade.loadStraightLines(DEFAULT_DATA_FILE);
+
+            logger.info("Successfully loaded {} lines", lines.size());
+            lines.forEach(line -> logger.debug("Loaded line: {}", line));
+
         } catch (StraightLineEntityException e) {
-            System.out.println("Error loading lines: " + e.getMessage());
-            return;
+            logger.error("Error loading lines: {}", e.getMessage());
+            printFileLocations(e);
         }
+    }
 
-        if (lines == null || lines.isEmpty()) {
-            System.out.println("No lines to process.");
-            return;
-        }
+    private static void printFileLocations(StraightLineEntityException e) {
+        logger.info("\nPlease ensure the file exists in one of these locations:");
+        logger.info("1. Project directory: {}",
+                Paths.get("").toAbsolutePath() + "/data/straight_lines.txt");
+        logger.info("2. Resources directory: src/main/resources/straight_lines.txt");
 
-        StraightLineService lineService = facade.getLineService();
+        logger.info("\nExample file content:");
+        logger.info("1.0,2.0,3.0,0.5,0.5,0.5");
+        logger.info("4.0,5.0,6.0,1.0,0.0,0.0");
 
-        StraightLineEntity line1 = lines.get(0);
-        StraightLineEntity line2 = lines.size() > 1 ? lines.get(1) : null;
-        StraightLineEntity line3 = lines.size() > 2 ? lines.get(2) : null;
-
-        try {
-            Point intersectionWithAxes = lineService.getIntersectionWithAxes(line1);
-            System.out.println("Intersection of line1 with axes: " + intersectionWithAxes);
-
-            if (line3 != null) {
-                Point intersection = lineService.getIntersection(line1, line3);
-                System.out.println("Intersection of line1 and line3: " + intersection);
-            }
-
-            if (line2 != null) {
-                boolean isParallel = lineService.isParallel(line1, line2);
-                System.out.println("Are line1 and line2 parallel? " + isParallel);
-            }
-
-            Map<String, List<StraightLineEntity>> parallelGroups = lineService.groupParallelLines(lines);
-            System.out.println("Parallel groups:");
-            parallelGroups.forEach((key, value) -> System.out.println("Group " + key + ": " + value));
-
-        } catch (Exception e) {
-            System.out.println("Error during calculations: " + e.getMessage());
+        if (e.getCause() != null) {
+            logger.debug("Root cause:", e);
         }
     }
 }
