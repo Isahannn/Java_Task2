@@ -4,12 +4,13 @@ import org.example.entity.StraightLineEntity;
 import org.example.exception.StraightLineEntityException;
 import org.example.validator.impl.StraightLineValidatorImpl;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class StraightLineParser {
+
     private final StraightLineValidatorImpl validator;
 
     public StraightLineParser() {
@@ -22,60 +23,51 @@ public class StraightLineParser {
 
     public List<StraightLineEntity> parseLines(List<String> lines) throws StraightLineEntityException {
         Objects.requireNonNull(lines, "Input lines list cannot be null");
-        List<StraightLineEntity> lineEntities = new ArrayList<>();
 
-        int lineNumber = 0;
-        for (String line : lines) {
-            lineNumber++;
-            String trimmedLine = line.trim();
-            if (trimmedLine.isEmpty()) continue;
+        try {
+            List<StraightLineEntity> entities = lines.stream()
+                    .map(String::trim)
+                    .filter(line -> !line.isEmpty())
+                    .map(this::parseLine)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .filter(validator::isValid)
+                    .collect(Collectors.toList());
 
-            String[] parts = trimmedLine.split(",");
-            if (parts.length != 6) {
+            if (entities.isEmpty()) {
                 throw new StraightLineEntityException(
-                        StraightLineEntityException.ErrorType.INVALID_LINE_DATA,
-                        String.format("Invalid data format at line %d: %s (expected 6 values, got %d)",
-                                lineNumber, line, parts.length)
+                        StraightLineEntityException.ErrorType.EMPTY_INPUT,
+                        "No valid straight line entities found in input"
                 );
             }
 
-            double[] coords = new double[6];
-            try {
-                for (int i = 0; i < 6; i++) {
-                    coords[i] = Double.parseDouble(parts[i].trim());
-                }
+            return List.copyOf(entities); // unmodifiable
 
-                if (!validator.isValid(coords)) {
-                    throw new StraightLineEntityException(
-                            StraightLineEntityException.ErrorType.INVALID_LINE_DATA,
-                            String.format("Invalid line data at line %d: %s (direction vector cannot be zero)",
-                                    lineNumber, line)
-                    );
-                }
-
-                StraightLineEntity entity = new StraightLineEntity(
-                        coords[0], coords[1], coords[2],
-                        coords[3], coords[4], coords[5]
-                );
-
-                lineEntities.add(entity);
-
-            } catch (NumberFormatException e) {
-                throw new StraightLineEntityException(
-                        StraightLineEntityException.ErrorType.PARSING_ERROR,
-                        String.format("Failed to parse numbers at line %d: %s", lineNumber, line),
-                        e
-                );
-            }
-        }
-
-        if (lineEntities.isEmpty()) {
+        } catch (Exception e) {
             throw new StraightLineEntityException(
-                    StraightLineEntityException.ErrorType.EMPTY_INPUT,
-                    "No valid lines found in input"
+                    StraightLineEntityException.ErrorType.PARSING_ERROR,
+                    "Failed to parse input lines: " + e.getMessage(),
+                    e
             );
         }
+    }
 
-        return Collections.unmodifiableList(lineEntities);
+    private Optional<StraightLineEntity> parseLine(String line) {
+        String[] parts = line.split(",");
+        if (parts.length != 6) return Optional.empty();
+
+        try {
+            double[] coords = new double[6];
+            for (int i = 0; i < 6; i++) {
+                coords[i] = Double.parseDouble(parts[i].trim());
+            }
+
+            return Optional.of(new StraightLineEntity(
+                    coords[0], coords[1], coords[2],
+                    coords[3], coords[4], coords[5]
+            ));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
     }
 }

@@ -1,5 +1,6 @@
 package org.example.validator.impl;
 
+import org.example.entity.StraightLineEntity;
 import org.example.validator.StraightLineValidator;
 
 public class StraightLineValidatorImpl implements StraightLineValidator {
@@ -21,5 +22,21 @@ public class StraightLineValidatorImpl implements StraightLineValidator {
         double dz = coords[5];
 
         return !(dx == 0 && dy == 0 && dz == 0);
+    }
+
+    // Метод для проверки валидности объекта StraightLineEntity
+    public boolean isValid(StraightLineEntity lineEntity) {
+        if (lineEntity == null) {
+            return false;
+        }
+        double[] coords = {
+                lineEntity.getPx(),
+                lineEntity.getPy(),
+                lineEntity.getPz(),
+                lineEntity.getDx(),
+                lineEntity.getDy(),
+                lineEntity.getDz()
+        };
+        return isValid(coords); // Используем нестатический метод
     }
 }

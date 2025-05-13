@@ -20,18 +20,16 @@ public class StraightLineFactoryImpl implements StraightLineFactory {
     @Override
     public Optional<StraightLineEntity> create2D(double px, double py, double dx, double dy) {
         double[] coords = {px, py, 0, dx, dy, 0};
-        if (validator.isValid(coords)) {
-            return Optional.of(new StraightLineEntity(px, py, dx, dy));
-        }
-        return Optional.empty();
+        return validator.isValid(coords)
+                ? Optional.of(new StraightLineEntity(px, py, dx, dy))
+                : Optional.empty();
     }
 
     @Override
     public Optional<StraightLineEntity> create3D(double px, double py, double pz, double dx, double dy, double dz) {
         double[] coords = {px, py, pz, dx, dy, dz};
-        if (validator.isValid(coords)) {
-            return Optional.of(new StraightLineEntity(px, py, pz, dx, dy, dz));
-        }
-        return Optional.empty();
+        return validator.isValid(coords)
+                ? Optional.of(new StraightLineEntity(px, py, pz, dx, dy, dz))
+                : Optional.empty();
     }
-}
+    }

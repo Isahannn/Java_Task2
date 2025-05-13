@@ -2,12 +2,13 @@ package org.example.io;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.exception.StraightLineEntityException;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,56 +17,39 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class CustomFileReader {
-    private static final Logger logger = LogManager.getLogger(CustomFileReader.class);
-    private static final String RESOURCES_PREFIX = "/";
+    private static final Logger logger = LogManager.getLogger();
 
-    public List<String> readLinesFromFile(String relativePath) throws IOException {
-        Objects.requireNonNull(relativePath, "File path cannot be null");
-
-        Path filePath = Paths.get(relativePath).toAbsolutePath();
-        logger.debug("Attempting to read file from: {}", filePath);
-
-        if (Files.exists(filePath)) {
-            logger.info("Reading file from filesystem: {}", filePath);
-            return readFileFromFilesystem(filePath);
-        }
-
-        logger.debug("File not found in filesystem, trying resources...");
-        return readFileFromResources(relativePath);
-    }
-
-    private List<String> readFileFromFilesystem(Path filePath) throws IOException {
+    public List<String> readLinesFromFile(String filename) throws StraightLineEntityException {
+        Path path = Paths.get(filename);
         try {
-            return Files.readAllLines(filePath);
-        } catch (IOException e) {
-            logger.error("Failed to read file from filesystem: {}", filePath, e);
-            throw new IOException("Failed to read file: " + filePath, e);
-        }
-    }
+            if (Files.exists(path)) {
+                logger.info("Reading file from filesystem: {}", path);
+                return Files.lines(path, StandardCharsets.UTF_8)
+                        .map(String::trim)
+                        .collect(Collectors.toList());
+            }
 
-    private List<String> readFileFromResources(String resourcePath) throws IOException {
-        String normalizedPath = resourcePath.startsWith(RESOURCES_PREFIX)
-                ? resourcePath
-                : RESOURCES_PREFIX + resourcePath;
+            logger.info("File not found on filesystem, trying as resource: {}", filename);
+            InputStream inputStream = getClass().getResourceAsStream("/" + filename);
+            if (inputStream == null) {
+                throw new StraightLineEntityException(
+                        StraightLineEntityException.ErrorType.FILE_OPERATION,
+                        "File not found: " + filename
+                );
+            }
 
-        InputStream inputStream = getClass().getResourceAsStream(normalizedPath);
-        if (inputStream == null) {
-            String errorMsg = "File not found in filesystem or resources: " + resourcePath;
-            logger.error(errorMsg);
-            throw new FileNotFoundException(errorMsg);
-        }
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                return reader.lines()
+                        .map(String::trim)
+                        .collect(Collectors.toList());
+            }
 
-        try {
-            return readFromStream(inputStream);
-        } catch (IOException e) {
-            logger.error("Failed to read resource file: {}", resourcePath, e);
-            throw new IOException("Failed to read resource file: " + resourcePath, e);
-        }
-    }
-
-    private List<String> readFromStream(InputStream inputStream) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            return reader.lines().collect(Collectors.toList());
+        } catch (IOException | NullPointerException e) {
+            throw new StraightLineEntityException(
+                    StraightLineEntityException.ErrorType.FILE_OPERATION,
+                    "Failed to read file: " + filename,
+                    e
+            );
         }
     }
 }

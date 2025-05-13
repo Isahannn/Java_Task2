@@ -22,6 +22,7 @@ public class StraightLineEntity {
         this(px, py, 0, dx, dy, 0);
     }
 
+    // Геттеры для координат
     public double getPx() {
         return px;
     }
@@ -44,6 +45,14 @@ public class StraightLineEntity {
 
     public double getDz() {
         return dz;
+    }
+
+    public double[] getPoint() {
+        return new double[]{px, py, pz};
+    }
+
+    public double[] getDirection() {
+        return new double[]{dx, dy, dz};
     }
 
     @Override
