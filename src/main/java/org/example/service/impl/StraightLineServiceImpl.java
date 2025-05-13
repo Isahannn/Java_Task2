@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.entity.Point;
 import org.example.entity.StraightLineEntity;
+import org.example.exception.StraightLineEntityException;
 import org.example.service.StraightLineArithmeticService;
 import org.example.service.StraightLineService;
 
@@ -14,7 +15,7 @@ public class StraightLineServiceImpl implements StraightLineService {
     private final StraightLineArithmeticService arithmeticService = new StraightLineArithmeticServiceImpl();
 
     @Override
-    public Point getIntersectionWithAxes(StraightLineEntity line) {
+    public Point getIntersectionWithAxes(StraightLineEntity line) throws StraightLineEntityException {
         double px = line.getPx();
         double py = line.getPy();
         double pz = line.getPz();
@@ -22,29 +23,23 @@ public class StraightLineServiceImpl implements StraightLineService {
         double dy = line.getDy();
         double dz = line.getDz();
 
-        // Calculate intersection with XY plane (z=0)
         if (dz != 0) {
             double t = -pz / dz;
-            return new Point(px + dx * t, py + dy * t, 0.0); // Ensure the result is Double
-        }
-        // Calculate intersection with XZ plane (y=0)
-        else if (dy != 0) {
+            return new Point(px + dx * t, py + dy * t, 0.0);
+        } else if (dy != 0) {
             double t = -py / dy;
-            return new Point(px + dx * t, 0.0, pz + dz * t); // Ensure the result is Double
-        }
-        // Calculate intersection with YZ plane (x=0)
-        else if (dx != 0) {
+            return new Point(px + dx * t, 0.0, pz + dz * t);
+        } else if (dx != 0) {
             double t = -px / dx;
-            return new Point(0.0, py + dy * t, pz + dz * t); // Ensure the result is Double
+            return new Point(0.0, py + dy * t, pz + dz * t);
         }
-        // Line doesn't intersect any axis
-        return null;
+
+        throw new StraightLineEntityException(StraightLineEntityException.ErrorType.NO_INTERSECTION,
+                "The line does not intersect any axis");
     }
 
     @Override
-    public Point getIntersection(StraightLineEntity line1, StraightLineEntity line2) {
-        // Implementation of line-line intersection in 3D space
-        // This is a simplified version - actual implementation may vary based on requirements
+    public Point getIntersection(StraightLineEntity line1, StraightLineEntity line2) throws StraightLineEntityException {
         double dx1 = line1.getDx();
         double dy1 = line1.getDy();
         double dz1 = line1.getDz();
@@ -53,13 +48,11 @@ public class StraightLineServiceImpl implements StraightLineService {
         double dy2 = line2.getDy();
         double dz2 = line2.getDz();
 
-        // Check if lines are parallel
         if (isParallel(line1, line2)) {
-            return null;
+            throw new StraightLineEntityException(StraightLineEntityException.ErrorType.PARALLEL_LINES,
+                    "The lines are parallel and do not intersect");
         }
 
-        // Solve system of equations to find intersection point
-        // This is a simplified approach - may need more robust solution
         try {
             double t = ((line2.getPx() - line1.getPx()) * dy2 - (line2.getPy() - line1.getPy()) * dx2) /
                     (dx1 * dy2 - dy1 * dx2);
@@ -71,7 +64,8 @@ public class StraightLineServiceImpl implements StraightLineService {
             return new Point(x, y, z);
         } catch (ArithmeticException e) {
             logger.error("Error calculating intersection", e);
-            return null;
+            throw new StraightLineEntityException(StraightLineEntityException.ErrorType.CALCULATION_ERROR,
+                    "Error calculating intersection point");
         }
     }
 
@@ -85,17 +79,14 @@ public class StraightLineServiceImpl implements StraightLineService {
         double dy2 = line2.getDy();
         double dz2 = line2.getDz();
 
-        // Check if direction vectors are scalar multiples
         double ratioX = dx1 != 0 ? dx2 / dx1 : 0.0;
         double ratioY = dy1 != 0 ? dy2 / dy1 : 0.0;
         double ratioZ = dz1 != 0 ? dz2 / dz1 : 0.0;
 
-        // Account for zero components
         if ((dx1 == 0 && dx2 != 0) || (dy1 == 0 && dy2 != 0) || (dz1 == 0 && dz2 != 0)) {
             return false;
         }
 
-        // Check if all non-zero ratios are equal (within some epsilon for floating point)
         double epsilon = 1e-10;
         return Math.abs(ratioX - ratioY) < epsilon && Math.abs(ratioY - ratioZ) < epsilon;
     }
@@ -108,7 +99,6 @@ public class StraightLineServiceImpl implements StraightLineService {
             StraightLineEntity line1 = lines.get(i);
             boolean added = false;
 
-            // Check existing groups
             for (Map.Entry<String, List<StraightLineEntity>> entry : groups.entrySet()) {
                 if (isParallel(line1, entry.getValue().get(0))) {
                     entry.getValue().add(line1);
@@ -117,7 +107,6 @@ public class StraightLineServiceImpl implements StraightLineService {
                 }
             }
 
-            // Create new group if not parallel to any existing
             if (!added) {
                 String groupId = "group_" + (groups.size() + 1);
                 List<StraightLineEntity> newGroup = new ArrayList<>();

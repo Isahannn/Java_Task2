@@ -1,7 +1,5 @@
 package org.example.entity;
 
-import java.util.Objects;
-
 public class Point {
     private final Double x;
     private final Double y;
@@ -19,25 +17,33 @@ public class Point {
 
     @Override
     public String toString() {
-        return "Point{" +
-                "x=" + (x == null ? "undefined" : x) +
-                ", y=" + (y == null ? "undefined" : y) +
-                ", z=" + (z == null ? "undefined" : z) +
-                '}';
+        StringBuilder sb = new StringBuilder();
+        sb.append("Point{x=")
+                .append(x)
+                .append(", y=")
+                .append(y)
+                .append(", z=")
+                .append(z )
+                .append("}");
+        return sb.toString();
     }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Point point = (Point) o;
-        return Objects.equals(x, point.x) &&
-                Objects.equals(y, point.y) &&
-                Objects.equals(z, point.z);
+        if (x != null ? !x.equals(point.x) : point.x != null) return false;
+        if (y != null ? !y.equals(point.y) : point.y != null) return false;
+        if (z != null ? !z.equals(point.z) : point.z != null) return false;
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y, z);
+        int result = 17;
+        result = 31 * result + (x != null ? x.hashCode() : 0);
+        result = 31 * result + (y != null ? y.hashCode() : 0);
+        result = 31 * result + (z != null ? z.hashCode() : 0);
+        return result;
     }
 }

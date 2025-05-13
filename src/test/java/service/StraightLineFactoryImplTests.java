@@ -16,9 +16,9 @@ public class StraightLineFactoryImplTests {
     @DataProvider(name = "valid2DLineData")
     public Object[][] provideValid2DData() {
         return new Object[][]{
-                {0.0, 0.0, 1.0, 1.0},  // Simple valid 2D line
-                {3.0, 4.0, -1.0, 2.0}, // Valid line with negative dx
-                {1.5, 2.5, 0.0, 5.0}   // Line parallel to the y-axis
+                {0.0, 0.0, 1.0, 1.0},
+                {3.0, 4.0, -1.0, 2.0},
+                {1.5, 2.5, 0.0, 5.0}
         };
     }
 

@@ -1,7 +1,5 @@
 package org.example.entity;
 
-import java.util.Objects;
-
 public class StraightLineEntity {
     private final double px;
     private final double py;
@@ -53,22 +51,32 @@ public class StraightLineEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StraightLineEntity that = (StraightLineEntity) o;
-        return Double.compare(that.px, px) == 0 &&
-                Double.compare(that.py, py) == 0 &&
-                Double.compare(that.pz, pz) == 0 &&
-                Double.compare(that.dx, dx) == 0 &&
-                Double.compare(that.dy, dy) == 0 &&
-                Double.compare(that.dz, dz) == 0;
+        return px == that.px &&
+                py == that.py &&
+                pz == that.pz &&
+                dx == that.dx &&
+                dy == that.dy &&
+                dz == that.dz;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(px, py, pz, dx, dy, dz);
+        int result = 17;
+        result = 31 * result + Double.hashCode(px);
+        result = 31 * result + Double.hashCode(py);
+        result = 31 * result + Double.hashCode(pz);
+        result = 31 * result + Double.hashCode(dx);
+        result = 31 * result + Double.hashCode(dy);
+        result = 31 * result + Double.hashCode(dz);
+        return result;
     }
 
     @Override
     public String toString() {
-        return String.format("StraightLineEntity{point(%.2f, %.2f, %.2f), direction[%.2f, %.2f, %.2f]}",
-                px, py, pz, dx, dy, dz);
+        StringBuilder sb = new StringBuilder();
+        sb.append("StraightLineEntity{point(")
+                .append(px).append(", ").append(py).append(", ").append(pz).append("), direction[")
+                .append(dx).append(", ").append(dy).append(", ").append(dz).append("]}");
+        return sb.toString();
     }
 }

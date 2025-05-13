@@ -17,13 +17,16 @@ public class StraightLineFacade {
         return lineService;
     }
 
-    public List<StraightLineEntity> loadStraightLines(String filename) throws StraightLineEntityException {
+    public List<StraightLineEntity> execute(String filename) throws StraightLineEntityException {
         CustomFileReader fileReader = new CustomFileReader();
         StraightLineValidatorImpl validator = new StraightLineValidatorImpl();
-        StraightLineParser parser = new StraightLineParser(validator);
+        StraightLineParser parser = new StraightLineParser(validator); // Теперь работает
 
         List<String> lines = fileReader.readLinesFromFile(filename);
-
         return parser.parseLines(lines);
+    }
+
+    public List<StraightLineEntity> loadStraightLines(String filename) throws StraightLineEntityException {
+        return execute(filename);
     }
 }

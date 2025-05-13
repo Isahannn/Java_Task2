@@ -9,7 +9,10 @@ import org.example.service.StraightLineService;
 import java.util.List;
 import java.util.Map;
 
+
+
 public class Main {
+    public static final String DATA_FILE = "data/straight_lines.txt";
     public static void main(String[] args) {
         StraightLineFacade facade = new StraightLineFacade();
 
